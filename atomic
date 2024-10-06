@@ -1,0 +1,73 @@
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/PPHUD/main/Library.lua'))()
+local Flags = Library.Flags
+
+local Window = Library:Window({
+   Text = "NIGGA SCRIPTS // ANOMIC"
+})
+
+local Tab = Window:Tab({
+   Text = "Autofarm"
+})
+
+
+local Section = Tab:Section({
+   Text = "Auto-Farm"
+})
+
+Section:Button({
+   Text = "Printers Stealer",
+   Callback = function()
+local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+if not hrp then return end
+local oldpos = hrp.CFrame
+for _, v in workspace.Entities:GetChildren() do if v.Name:find("Printer") and v:FindFirstChild("Properties") and v:FindFirstChild("outerhitbox") and v.Properties.CurrentPrinted.Value ~= 0 then
+    if v.Properties.ItemLocked.Value then
+        local picking = true
+        task.spawn(function()
+            while picking and task.wait() do
+                if hrp then
+                    hrp.CFrame = v:FindFirstChild("outerhitbox") and v.outerhitbox.CFrame + Vector3.new(0, -7, 0)
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                end
+            end
+        end)
+        local args = {
+            [1] = v
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("_CS.Events"):WaitForChild("LockpickEvent"):FireServer(unpack(args))
+        task.wait(16)
+        local args = {
+            [1] = "PickPrinter",
+            [2] = v,
+            [3] = game:GetService("Players").LocalPlayer.Character.Lockpick
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("_CS.Events"):WaitForChild("ToolEvent"):FireServer(unpack(args))
+        local args = {
+            [1] = v
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("_CS.Events"):WaitForChild("UsePrinter"):FireServer(unpack(args))
+        picking = false
+    else
+        local picking = true
+            task.spawn(function()
+            while picking and task.wait() do
+                if hrp then
+                    hrp.CFrame = v:FindFirstChild("outerhitbox") and v.outerhitbox.CFrame + Vector3.new(0, -7, 0)
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                end
+            end
+        end)
+        task.wait(0.3)
+        local args = {
+            [1] = v
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("_CS.Events"):WaitForChild("UsePrinter"):FireServer(unpack(args))
+        picking = false
+    end
+end end
+task.wait(0.1)
+if hrp then hrp.CFrame = oldpos end
+   end
+})
+
+Tab:Select()
