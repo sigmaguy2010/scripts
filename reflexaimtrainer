@@ -1,0 +1,127 @@
+getgenv().syn = {protect_gui = function(...)return ... end}
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/PPHUD/main/Library.lua'))()
+local Flags = Library.Flags
+
+
+local uis = game:GetService("UserInputService")
+local camera = workspace.CurrentCamera
+
+-----------------------------------------------------------------------------
+
+local cheat = {
+    Library = nil,
+    Toggles = nil,
+    Options = nil,
+    ThemeManager = nil,
+    SaveManager = nil,
+    connections = {
+        heartbeats = {},
+        renderstepped = {}
+    },
+    drawings = {},
+    hooks = {}
+}
+cheat.utility = {} do
+    cheat.utility.new_hook = function(f, newf, usecclosure)
+        if usecclosure then
+            local old; old = hookfunction(f, newcclosure(function(...)
+                return newf(old, ...)
+            end))
+            cheat.hooks[f] = old
+            return old
+        else
+            local old; old = hookfunction(f, function(...)
+                return newf(old, ...)
+            end)
+            cheat.hooks[f] = old
+            return old
+        end
+    end
+end
+
+local fw = {}
+for _, v in getgc(false) do
+    if not (type(v) == "function" and islclosure(v)) then continue end
+    local info = getinfo(v)
+    if not info then continue end
+    if not info.name then continue end
+    if info.name == "fire" then
+        fw.fire = v
+    end
+    if info.name == "raycast" then
+        fw.raycast = v
+    end
+    if info.name == "eject" then
+        fw.eject = v
+    end
+end
+local get_target = function()
+    local chosen, distance = nil, math.huge
+    for _, target in workspace.Targets:GetChildren() do
+        local mouse = uis:GetMouseLocation()
+        local position = camera:WorldToViewportPoint(target.Position)
+        local tdst = (mouse - Vector2.new(position.X, position.Y)).Magnitude
+        if distance > tdst then
+            chosen = target
+            distance = tdst
+        end
+    end
+    return chosen, distance
+end
+
+-----------------------------------------------------------
+
+local Window = Library:Window({
+   Text = "NIGGAS SKID SCRIPT // REFLEX AIM TRAINER"
+})
+
+local Tab = Window:Tab({
+   Text = "Aiming"
+})
+
+local Section = Tab:Section({
+   Text = "Aiming"
+})
+local niggeraim = false
+local niggershoot = false
+local niggerultra = false
+Section:Check({
+   Text = "Silent-Aim",
+   Callback = function(bool)
+    niggeraim = bool
+   end
+})
+Section:Check({
+   Text = "Auto-fire on E",
+   Callback = function(bool)
+    niggershoot = bool
+   end
+})
+Section:Check({
+   Text = "Ultra auto-fire",
+   Callback = function(bool)
+    niggerultra = bool
+   end
+})
+Tab:Select()
+
+cheat.utility.new_hook(fw.raycast, function(old_raycast, ...)
+    local target = get_target()
+    if niggeraim and target then
+        local campos = camera.CFrame.Position
+        local targetpos = target.Position
+        return {
+            Instance = target,
+            Position = targetpos,
+            Normal = Vector3.new(math.random(), math.random(), math.random()).Unit,
+        }
+    else
+        return old_raycast(...)
+    end
+end)
+cheat.utility.new_hook(fw.eject, function(old_eject, ...)
+    return
+end)
+while task.wait(niggerultra and 0.01 or 1/20) and not getgenv().disablenigger do
+    if niggershoot and uis:IsKeyDown(Enum.KeyCode.E) then fw.fire() end
+end
